@@ -1,7 +1,12 @@
-# bitluni's ESP32 VGA
+﻿# bitluni's ESP32 VGA
 A simple VGA output with 14Bit color and external DACs over parallel I²S
+
+THanks for any support!
+
 Patreon (https://patreon.com/bitluni)
 Paypal (https://paypal.me/bitluni)
+
+Version 0.1
 
 
 #License

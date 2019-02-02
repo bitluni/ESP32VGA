@@ -1,3 +1,11 @@
+/*
+	Author: bitluni 2019	
+	For further details check out: 
+		https://youtube.com/bitlunislab
+		https://github.com/bitluni
+		http://bitluni.net
+*/
+
 #include <Arduino.h>
 #include "src/ESP32Lib/src/Graphics/I2SVGA.h"
 #include <soc/rtc.h>
@@ -8,9 +16,9 @@ typedef unsigned short Color;
 
 #include "gfx/font6x8.h"
 #include "gfx/thinker.h"
-#include "gfx/venus.h"
+//#include "gfx/venus.h"
 Font<Graphics<Color>> font(6, 8, font6x8::pixels);
-Mesh<Graphics<Color>> model(venus::vertexCount, venus::vertices, 0, 0, venus::triangleCount, venus::triangles, venus::triangleNormals);
+//Mesh<Graphics<Color>> model(venus::vertexCount, venus::vertices, 0, 0, venus::triangleCount, venus::triangles, venus::triangleNormals);
 Mesh<Graphics<Color>> model2(thinker::vertexCount, thinker::vertices, 0, 0, thinker::triangleCount, thinker::triangles, thinker::triangleNormals);
 
 //Note that the I/O GPIO pads are 0-19, 21-23, 25-27, 32-39, while the output GPIOs are 0-19, 21-23, 25-27, 32-33. GPIO pads 34-39 are input-only
@@ -21,13 +29,14 @@ Mesh<Graphics<Color>> model2(thinker::vertexCount, thinker::vertices, 0, 0, thin
 //25, 26 (DAC)
 //1(TX), 3(RX)
 
+//pin configuration, (you could use 32 and 33, for the syncs instead)
 const int redPins[] = {2, 4, 12, 13, 14};
 const int greenPins[] = {15, 16, 17, 18, 19};
 const int bluePins[] = {21, 22, 23, 27};
 const int hsyncPin = 0;
 const int vsyncPin = 5;
 
-//VGA Device
+//VGA Device (I2S0)
 I2SVGA graphics(0);
 
 void setup()
@@ -39,7 +48,8 @@ void setup()
   graphics.setFont(font);
 }
 
-void drawLogo()
+//render 3d model
+void drawModel()
 {
   static Matrix perspective = Matrix::translation(graphics.xres / 2, graphics.yres / 2, 0) * Matrix::scaling(100 * graphics.pixelAspect(), 100, 100) * Matrix::perspective(90, 1, 10);
   static float u = 0;
@@ -51,6 +61,7 @@ void drawLogo()
   graphics.flush();
 }
 
+//show output
 void draw()
 {
   static int lastMillis = 0;
@@ -58,25 +69,21 @@ void draw()
   int fps = 1000 / (t - lastMillis);
   lastMillis = t;
   graphics.begin();
-  //graphics.clear((16) | ((32) << 5) | ((16) << 11));
-  for (int y = 0; y < graphics.yres; y++)
-    for (int x = 0; x < graphics.xres; x++)
-      graphics.backbuffer[y][x] = 0; //(31 - x / 8) | ((16) << 5) | ((15 - y / 16) << 10);
-  drawLogo();
-  //luni.drawMix(graphics, (t / 100) % 5, 30, 0);
+  graphics.clear(0);
+  drawModel();
   graphics.setTextColor(0xffff);
   graphics.setCursor(0, 0);
-  //graphics.print("mem: ");
-  //graphics.print((int)heap_caps_get_free_size(MALLOC_CAP_DEFAULT));
-  //graphics.print(" fps: ");
-  //graphics.print(fps, 10, 2);
-  //graphics.print(" tris/s: ");
-  //graphics.print(fps * model.triangleCount);
+  graphics.print("mem: ");
+  graphics.print((int)heap_caps_get_free_size(MALLOC_CAP_DEFAULT));
+  graphics.print(" fps: ");
+  graphics.print(fps, 10, 2);
+  graphics.print(" tris/s: ");
+  graphics.print(fps * model2.triangleCount);
   graphics.end();
 }
 
+//just draw
 void loop()
 {
   draw();
-  //delay(20);
 }
